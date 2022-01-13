@@ -1,0 +1,43 @@
+{
+    "name": "codificar/surgeprice",
+    "description": "A lib of integration with delivery's plataforms for laravel",
+    "type": "package",
+    "require": {
+        "grimzy/laravel-mysql-spatial": "^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "7.5"
+    },
+    "license": "Codificar Sistemas LTDA",
+    "authors": [
+        {
+            "name": "Vinicius Terra",
+            "email": "vinicius.terra@codificar.com.br"
+        }
+    ],
+    "repositories": [
+        {
+          "type": "package",
+          "package": {
+            "name": "codificar/surgeprice",
+            "version": "master",
+            "source": {
+              "url": "https://libs:ofImhksJ@git.codificar.com.br/laravel-libs/surgeprice.git",
+              "type": "git",
+              "reference": "master"
+            }
+          }
+        }
+    ],    
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Codificar\\SurgePrice\\": "src/"
+        }
+        
+    }
+}
