@@ -15,10 +15,10 @@ class SurgePriceServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__.'/Routes/web.php');
 
         // // Load laravel views (Carregas as views do Laravel, blade)
-        $this->loadViewsFrom(__DIR__.'/resources/views', 'surgeprice');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'surgeprice');
 
         // Load Migrations (Carrega todas as migrations)
-        $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         // // Commands (Carrega os comandos do projeto)
         //$this->commands([Polling::class]);
