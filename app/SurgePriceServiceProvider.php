@@ -11,8 +11,8 @@ class SurgePriceServiceProvider extends ServiceProvider
 
 
         // Load routes (carrega as rotas)
-        $this->loadRoutesFrom(__DIR__.'/Routes/api.php');
-        $this->loadRoutesFrom(__DIR__.'/Routes/web.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
+        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 
         // // Load laravel views (Carregas as views do Laravel, blade)
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'surgeprice');
@@ -28,7 +28,7 @@ class SurgePriceServiceProvider extends ServiceProvider
 
         // Load seeds
         $this->publishes([
-            __DIR__.'/Database/Seeds' => database_path('seeds')
+            __DIR__.'/database/Seeds' => database_path('seeds')
         ], 'public_vuejs_libs');
 
 
