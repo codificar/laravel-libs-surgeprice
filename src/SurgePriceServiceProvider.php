@@ -2,6 +2,8 @@
 namespace Codificar\SurgePrice;
 
 use Illuminate\Support\ServiceProvider;
+use Codificar\SurgePrice\Console\Commands\TrainModels;
+use Codificar\SurgePrice\Console\Commands\PredictData;
 
 class SurgePriceServiceProvider extends ServiceProvider
 {
@@ -11,17 +13,17 @@ class SurgePriceServiceProvider extends ServiceProvider
 
 
         // Load routes (carrega as rotas)
-        $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
-        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        $this->loadRoutesFrom(__DIR__.'/routes/api.php');
+        $this->loadRoutesFrom(__DIR__.'/routes/web.php');
 
         // // Load laravel views (Carregas as views do Laravel, blade)
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'surgeprice');
+        $this->loadViewsFrom(__DIR__.'/resources/views', 'surgeprice');
 
         // Load Migrations (Carrega todas as migrations)
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
 
         // // Commands (Carrega os comandos do projeto)
-        //$this->commands([Polling::class]);
+        $this->commands([TrainModels::class, PredictData::class]);
 
         // // Load trans files (Carrega tos arquivos de traducao) 
         //$this->loadTranslationsFrom(__DIR__.'/resources/lang', 'surgeprice');
@@ -47,8 +49,9 @@ class SurgePriceServiceProvider extends ServiceProvider
      */
     public function provides()
     {
-        // return [
-        //     'command.events.polling',
-        // ];
+        return [
+            'command.ml.train_models',
+            'command.ml.predict_data',
+        ];
     }
 }
