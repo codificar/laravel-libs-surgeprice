@@ -1,6 +1,6 @@
 <?php
 
-namespace Codificar\Surgeprice\Models;
+namespace Codificar\SurgePrice\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
