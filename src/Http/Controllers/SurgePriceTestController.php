@@ -9,11 +9,11 @@ use Symfony\Component\Process\Process;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Requests;
 use Provider;
-use Codificar\Surgeprice\Models\SurgeSettings;
-use Codificar\Surgeprice\Models\SurgeRegion;
-use Codificar\Surgeprice\Models\SurgeCity;
-use Codificar\Surgeprice\Models\SurgeArea;
-use Codificar\Surgeprice\Models\SurgeHistory;
+use Codificar\SurgePrice\Models\SurgeSettings;
+use Codificar\SurgePrice\Models\SurgeRegion;
+use Codificar\SurgePrice\Models\SurgeCity;
+use Codificar\SurgePrice\Models\SurgeArea;
+use Codificar\SurgePrice\Models\SurgeHistory;
 use DB;
 use Carbon\Carbon;
 

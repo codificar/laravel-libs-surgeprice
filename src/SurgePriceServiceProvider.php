@@ -30,8 +30,8 @@ class SurgePriceServiceProvider extends ServiceProvider
 
         // Load seeds
         $this->publishes([
-            __DIR__.'/database/Seeds' => database_path('seeds')
-        ], 'public_vuejs_libs');
+            __DIR__.'/database/seeds' => database_path('seeds')
+        ], 'surgeprice-seeds');
 
 
 

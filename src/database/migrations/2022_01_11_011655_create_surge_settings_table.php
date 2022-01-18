@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
+use Codificar\SurgePrice\Models\SurgeSettings;
+use Carbon\Carbon;
+
 class CreateSurgeSettingsTable extends Migration
 {
     /**
@@ -24,6 +27,18 @@ class CreateSurgeSettingsTable extends Migration
             $table->string('model_files_path', 4096);
             $table->timestamps();
         });
+        // Seed default settings.
+        DB::table('surge_settings')->insert([
+            'update_surge_window' => 5,
+            'min_surge' => 1.5,
+            'max_surge' => 5,
+            'delimiter' => SurgeSettings::DAMPING,
+            'lof_neighbors' => 15,
+            'lof_contamination' => 0.05,
+            'model_files_path' => '/var/tmp/surgeprice/',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
+        ]);
     }
 
     /**
