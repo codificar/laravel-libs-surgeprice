@@ -23,7 +23,7 @@ class SurgeArea extends Model
      */
     public function region()
     {
-        return $this->belongsTo('SurgeRegion');
+        return $this->belongsTo('Codificar\SurgePrice\Models\SurgeRegion');
     }
 
     /**
@@ -33,6 +33,6 @@ class SurgeArea extends Model
      */
     public function surgeHistory()
     {
-        return $this->hasMany('SurgeHistory', 'surge_area_id');
+        return $this->hasMany('Codificar\SurgePrice\Models\SurgeHistory', 'surge_area_id');
     }
 }

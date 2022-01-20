@@ -15,6 +15,6 @@ class SurgeHistory extends Model
      */
     public function surgeArea()
     {
-        return $this->belongsTo('SurgeArea');
+        return $this->belongsTo('Codificar\SurgePrice\Models\SurgeArea');
     }
 }

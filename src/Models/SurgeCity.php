@@ -18,6 +18,6 @@ class SurgeCity extends Model
      */
     public function region()
     {
-        return $this->belongsTo('SurgeRegion');
+        return $this->belongsTo('Codificar\SurgePrice\Models\SurgeRegion');
     }
 }

@@ -6,11 +6,11 @@ use Symfony\Component\Process\Process;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Requests;
 use Provider;
-use Codificar\Surgeprice\Models\SurgeSettings;
-use Codificar\Surgeprice\Models\SurgeRegion;
-use Codificar\Surgeprice\Models\SurgeCity;
-use Codificar\Surgeprice\Models\SurgeArea;
-use Codificar\Surgeprice\Models\SurgeHistory;
+use Codificar\SurgePrice\Models\SurgeSettings;
+use Codificar\SurgePrice\Models\SurgeRegion;
+use Codificar\SurgePrice\Models\SurgeCity;
+use Codificar\SurgePrice\Models\SurgeArea;
+use Codificar\SurgePrice\Models\SurgeHistory;
 use DB;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -97,15 +97,16 @@ class PredictData extends Command
             $provider_request_map = []; // supply and demand count
             $ml_path = $settings->model_files_path.'/';
             // Run the model prediction(inference) using python ML with the request data.
-            $process = new Process(['python', __DIR__.'/../resources/scripts/predict-data.py',
+            $process = new Process(['python', __DIR__.'/../../resources/scripts/predict-data.py',
                                     '-i',$request_prediction_file,
                                     '-d', 'request',
                                     '-s', $region->state,
                                     '-p' ,$ml_path]);
             $process->run();
             // Set the requests count in time period for each surge area in region.
-            if (($open = fopen($ml_path.'/'.$region->state.'/request-output.csv', "r")) !== FALSE) 
+            if (file_exists($ml_path.'/'.$region->state.'/request-output.csv'))
             {
+                $open = fopen($ml_path.'/'.$region->state.'/request-output.csv', "r");
                 while (($line = fgets($open)) !== false) {
                     $area = array_map('intval', explode(",",$line))[0];
                     if(!array_key_exists($area, $provider_request_map))
@@ -120,15 +121,16 @@ class PredictData extends Command
                 fclose($open);
             }
             // Run the model prediction(inference) using python ML with the provider data.
-            $process = new Process(['python', __DIR__.'/../resources/scripts/predict-data.py',
+            $process = new Process(['python', __DIR__.'/../../resources/scripts/predict-data.py',
                                     '-i',$provider_prediction_file,
                                     '-d', 'provider',
                                     '-s', $region->state,
                                     '-p' ,$ml_path]);
             $process->run();
             // Set the active providers count in time period for each surge area in region.
-            if (($open = fopen($ml_path.'/'.$region->state.'/provider-output.csv', "r")) !== FALSE) 
+            if (file_exists($ml_path.'/'.$region->state.'/provider-output.csv')) 
             {
+                $open = fopen($ml_path.'/'.$region->state.'/provider-output.csv', "r");
                 while (($line = fgets($open)) !== false) {
                     $area = array_map('intval', explode(",",$line))[0];
                     if(!array_key_exists($area, $provider_request_map))

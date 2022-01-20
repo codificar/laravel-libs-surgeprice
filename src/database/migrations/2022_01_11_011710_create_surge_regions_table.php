@@ -15,7 +15,7 @@ class CreateSurgeRegionsTable extends Migration
     {
         Schema::create('surge_regions', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('country', 100);
+            $table->string('country', 100)->default('Brasil'); // Edit for international support
             $table->enum('state', ['AC','AL','AP','AM','BA','CE','DF',
                                     'ES','GO','MA','MT','MS','MG','PA',
                                     'PB','PR','PE','PI','RJ','RN','RS',

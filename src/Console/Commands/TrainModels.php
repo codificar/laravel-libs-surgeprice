@@ -6,11 +6,11 @@ use Symfony\Component\Process\Process;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Requests;
 use Provider;
-use Codificar\Surgeprice\Models\SurgeSettings;
-use Codificar\Surgeprice\Models\SurgeRegion;
-use Codificar\Surgeprice\Models\SurgeCity;
-use Codificar\Surgeprice\Models\SurgeArea;
-use Codificar\Surgeprice\Models\SurgeHistory;
+use Codificar\SurgePrice\Models\SurgeSettings;
+use Codificar\SurgePrice\Models\SurgeRegion;
+use Codificar\SurgePrice\Models\SurgeCity;
+use Codificar\SurgePrice\Models\SurgeArea;
+use Codificar\SurgePrice\Models\SurgeHistory;
 use DB;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -164,43 +164,45 @@ class TrainModels extends Command
             $train = implode(PHP_EOL,$regionTrainedData);
             file_put_contents($ml_path.$train_file, $train);
             //  Run the model train using Python ML to obtain TOTAL AREAS, CENTROIDS and INDEXES.
-            $process = new Process(['python', __DIR__.'/../resources/scripts/train-models.py',
+            $process = new Process(['python', __DIR__.'/../../resources/scripts/train-models.py',
                                     '-t',$train_file,
                                     '-m', $currentRegions[$state]->min_area_requests, 
                                     '-n', $settings->lof_neighbors, 
                                     '-c', $settings->lof_contamination,
                                     '-p' ,$ml_path]);
             $process->run();
-            if (($open = fopen($ml_path.'/centroids.csv', "r")) !== FALSE) 
+            // New model generated.
+            if (file_exists($ml_path.'/centroids.csv'))
             {
+                $open = fopen($ml_path.'/centroids.csv', "r");
+                while (($data = fgetcsv($open, 1000, ",")) !== FALSE) 
+                {        
+                    $centroids[] = array_map('floatval', $data); 
+                }
             
-              while (($data = fgetcsv($open, 1000, ",")) !== FALSE) 
-              {        
-                $centroids[] = array_map('floatval', $data); 
-              }
-            
-              fclose($open);
-            }
-            // Update total areas for the region in DB.
-            $currentRegions[$state]->total_areas = count($centroids);
-            $currentRegions[$state]->save();
-            // Remove legacy surge areas (clusters) and related surge history.
-            foreach ($region->surgeAreas()->get() as $surgeArea)
-            {
-                $surgeArea->surgeHistory()->delete();
-            }
-            $currentRegions[$state]->surgeAreas()->delete();
-            //  Save new surge areas (clusters) centroids and indexes for region in DB.
-            foreach ($centroids as $i => $centroid)
-            {
-                $surgeArea = new SurgeArea();
-                $surgeArea->region()->associate($currentRegions[$state]);
-                $surgeArea->index = $i;
-                $surgeArea->centroid = new Point($centroid[0], $centroid[1]);
-                $surgeArea->save();
+                fclose($open);
+                // Update total areas for the region in DB.
+                $currentRegions[$state]->total_areas = count($centroids);
+                $currentRegions[$state]->save();
+                // Remove legacy surge areas (clusters) and related surge history.
+                foreach ($region->surgeAreas()->get() as $surgeArea)
+                {
+                    $surgeArea->surgeHistory()->delete();
+                }
+                $currentRegions[$state]->surgeAreas()->delete();
+                //  Save new surge areas (clusters) centroids and indexes for region in DB.
+                foreach ($centroids as $i => $centroid)
+                {
+                    $surgeArea = new SurgeArea();
+                    $surgeArea->region()->associate($currentRegions[$state]);
+                    $surgeArea->index = $i;
+                    $surgeArea->centroid = new Point($centroid[0], $centroid[1]);
+                    $surgeArea->save();
+                }
             }
         }
 
-        // # TODO: CALL INFERENCE SCRIPT FOR LAST WINDOW?
+        // Update the surge multiplier for the new generated surge areas.
+        $this->call('ml:predict_data');
     }
 }

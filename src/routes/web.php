@@ -14,11 +14,12 @@
 // Route::get('/surge', 'SurgePriceTestController@surgeAreas');
 // Route::get('/train', 'SurgePriceTestController@trainData');
 // Route::get('/provider', 'SurgePriceTestController@provider');
-// Route::get('/lof', 'SurgePriceTestController@lof');
 
-// Route::group(
-//     array('namespace' => 'Codificar\SurgePrice\Http\Controllers', 'prefix' => '/surgeprice',
-//     function () {
-//         Route::get('/inference', 'SurgePriceTestController@dataInference');
-//         Route::get('/surgeprice', 'SurgePriceTestController@trainModel');
-//     }));
+Route::group(
+    array('namespace' => 'Codificar\SurgePrice\Http\Controllers', 'prefix' => '/surgeprice'),
+    function () {
+        Route::get('/', 'SurgePriceController@index');
+        Route::post('/', 'SurgePriceController@saveSettings')->name('surgeprice.save_settings');
+        Route::get('/region/', 'SurgePriceController@createRegion')->name('surgeprice.create_region');
+        Route::post('/region/', 'SurgePriceController@manageRegion')->name('surgeprice.manage_region');
+    });

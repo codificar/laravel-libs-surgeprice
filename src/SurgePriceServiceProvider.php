@@ -29,10 +29,14 @@ class SurgePriceServiceProvider extends ServiceProvider
         //$this->loadTranslationsFrom(__DIR__.'/resources/lang', 'surgeprice');
 
         // Load seeds
-        $this->publishes([
-            __DIR__.'/database/seeds' => database_path('seeds')
-        ], 'surgeprice-seeds');
+        // $this->publishes([
+        //     __DIR__.'/database/seeds' => database_path('seeds')
+        // ], 'surgeprice');
 
+        // Load public images
+        $this->publishes([
+            __DIR__.'/../public/images' => public_path('vendor/codificar/surgeprice'),
+        ], 'surgeprice');
 
 
     }
