@@ -31,12 +31,14 @@ psr-4:{
 
 Register the service provider in `config/app.php`:
 
+```php
 'providers' => [
   /*
    * Package Service Providers...
    */
   Codificar\SurgePrice\SurgePriceServiceProvider::class,
 ],
+```
 
 Publish public images:
 
