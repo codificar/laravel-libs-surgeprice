@@ -97,7 +97,7 @@ class PredictData extends Command
             $provider_request_map = []; // supply and demand count
             $ml_path = $settings->model_files_path.'/';
             // Run the model prediction(inference) using python ML with the request data.
-            $process = new Process(['python', __DIR__.'/../../resources/scripts/predict-data.py',
+            $process = new Process(['python3', __DIR__.'/../../resources/scripts/predict-data.py',
                                     '-i',$request_prediction_file,
                                     '-d', 'request',
                                     '-s', $region->state,
@@ -121,7 +121,7 @@ class PredictData extends Command
                 fclose($open);
             }
             // Run the model prediction(inference) using python ML with the provider data.
-            $process = new Process(['python', __DIR__.'/../../resources/scripts/predict-data.py',
+            $process = new Process(['python3', __DIR__.'/../../resources/scripts/predict-data.py',
                                     '-i',$provider_prediction_file,
                                     '-d', 'provider',
                                     '-s', $region->state,

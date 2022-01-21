@@ -17,17 +17,25 @@ Add in composer.json:
 
 ```php
 require:{
-        "codificar/surgeprice": "master",
-}
+        "codificar/surgeprice": "master@dev",
 }
 ```
 
 ```php
-psr-4:{
-    "Codificar\\SurgePrice\\": "vendor/codificar/surgeprice/src/",
+"autoload": {
+    "psr-4": {
+        "Codificar\\SurgePrice\\": "vendor/codificar/surgeprice/src/"
+    },
 }
 ```
 
+This package requires [Laravel MySQL Spatial extension 2.0](https://github.com/grimzy/laravel-mysql-spatial) as a dependency. In case your project already uses this dependency, be sure to update to the required version or later.
+
+Update project dependencies:
+
+```shell
+$ composer update
+```
 
 Register the service provider in `config/app.php`:
 
@@ -50,4 +58,21 @@ Run the migrations:
 
 ```shell
 $ php artisan vendor:migrate
+```
+
+Install python 3 required libs:
+```
+sudo apt install python3-pip
+
+pip3 install -U pandas
+
+pip3 install -U scikit-learn
+```
+
+## Configuration
+
+Navigate to route **/surgeprice/** and ensure to set a valid sytem path for Machine Learning related files. Default path:
+
+```shell
+/var/tmp/surgeprice/
 ```

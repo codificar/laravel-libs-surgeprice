@@ -164,7 +164,7 @@ class TrainModels extends Command
             $train = implode(PHP_EOL,$regionTrainedData);
             file_put_contents($ml_path.$train_file, $train);
             //  Run the model train using Python ML to obtain TOTAL AREAS, CENTROIDS and INDEXES.
-            $process = new Process(['python', __DIR__.'/../../resources/scripts/train-models.py',
+            $process = new Process(['python3', __DIR__.'/../../resources/scripts/train-models.py',
                                     '-t',$train_file,
                                     '-m', $currentRegions[$state]->min_area_requests, 
                                     '-n', $settings->lof_neighbors, 
