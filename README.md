@@ -57,7 +57,7 @@ $ php artisan vendor:publish --tag=surgeprice --force
 Run the migrations:
 
 ```shell
-$ php artisan vendor:migrate
+$ php artisan migrate
 ```
 
 Install python 3 required libs:
