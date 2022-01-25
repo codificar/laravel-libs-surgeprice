@@ -84,12 +84,12 @@ Run the following command to create the ML models for each region configured:
 ```shell
 php artisan ml:train_models 
 ```
-> **Note**: This command will exclude all existing surge areas and their respective surge history. Avoid running it in stabilized regions, where all surge areas were already detected. 
->
+> **Note**: This command will exclude all existing surge areas and their respective surge history. 
 > It is only recommended to run it periodically on new regions, to detect possible new surge areas.
+> Avoid running it in stabilized regions, where all surge areas were already detected. 
 
 
-Schedule the following command to update the surge for every area defined by the ML models:
+Schedule the following command to update the surge fare for each surge area defined by the ML models:
 
 ```shell
 php artisan ml:predict_data
