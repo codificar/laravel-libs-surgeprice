@@ -85,7 +85,9 @@ Run the following command to create the ML models for each region configured:
 php artisan ml:train_models 
 ```
 > **Note**: This command will exclude all existing surge areas and their respective surge history. 
+> 
 > It is only recommended to run it periodically on new regions, to detect possible new surge areas.
+> 
 > Avoid running it in stabilized regions, where all surge areas were already detected. 
 
 
