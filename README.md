@@ -77,6 +77,12 @@ Navigate to route **/surgeprice/** and ensure to set a valid sytem path for Mach
 /var/tmp/surgeprice/
 ```
 
+Add the existing regions based on requests/providers location (state):
+
+
+> ![alt text](/region_example.jpg?raw=true)
+
+
 ## Quickstart
 
 Run the following command to create the ML models for each region configured:
