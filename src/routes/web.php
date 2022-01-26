@@ -16,7 +16,7 @@
 // Route::get('/provider', 'SurgePriceTestController@provider');
 
 Route::group(
-    array('namespace' => 'Codificar\SurgePrice\Http\Controllers', 'prefix' => '/surgeprice'),
+    array('namespace' => 'Codificar\SurgePrice\Http\Controllers', 'prefix' => '/surgeprice', 'middleware' => 'auth.admin'),
     function () {
         Route::get('/', 'SurgePriceController@index');
         Route::post('/', 'SurgePriceController@saveSettings')->name('surgeprice.save_settings');
