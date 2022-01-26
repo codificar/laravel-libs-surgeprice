@@ -17,7 +17,7 @@ Add in composer.json:
 
 ```php
 require:{
-        "codificar/surgeprice": "master@dev",
+        "codificar/surgeprice": "0.1.0",
 }
 ```
 
