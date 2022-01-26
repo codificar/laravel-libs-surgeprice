@@ -12,7 +12,7 @@
         <label>Caminho no sistema para modelos de ML:</label><br/>
         <input type="text" name="model_files_path"  value="{{$settings->model_files_path}}"></br><br/>
         <label>Janela de atualização para surge factor: </label>
-        <input type="text" style="text-align:center;" maxlength="3" size="3" name="update_surge_window" value="{{$settings->update_surge_window}}"> minutos</br><br/>
+        <input type="text" style="text-align:center;" maxlength="2" size="2" name="update_surge_window" value="{{$settings->update_surge_window}}"> minutos</br><br/>
         <label>Delimitadores para surge factor: </label>
         <input type="text" style="text-align:center;" maxlength="3" size="3" name="min_surge"  value="{{$settings->min_surge}}">
         <label> até </label>
