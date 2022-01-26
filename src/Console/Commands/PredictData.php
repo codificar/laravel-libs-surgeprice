@@ -154,7 +154,9 @@ class PredictData extends Command
                     $surgeHistory->surgeArea()->associate($surgeArea);
                     $surgeHistory->providers_count = $provider_request_map[$surgeArea->index][0];
                     $surgeHistory->requests_count = $provider_request_map[$surgeArea->index][1];
-                    $factor =  $surgeHistory->requests_count /  $surgeHistory->providers_count; // supply/demand
+                    $factor =  ($surgeHistory->providers_count)? // are there any providers in the surge area?
+                                $surgeHistory->requests_count /  $surgeHistory->providers_count: // supply/demand
+                                1.0;
 
                     // Set multiplier delimiters
                     if($factor < $settings->min_surge)
