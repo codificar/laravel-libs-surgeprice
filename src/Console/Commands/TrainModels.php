@@ -185,7 +185,7 @@ class TrainModels extends Command
                 $currentRegions[$state]->total_areas = count($centroids);
                 $currentRegions[$state]->save();
                 // Remove legacy surge areas (clusters) and related surge history.
-                foreach ($region->surgeAreas()->get() as $surgeArea)
+                foreach ($currentRegions[$state]->surgeAreas()->get() as $surgeArea)
                 {
                     $surgeArea->surgeHistory()->delete();
                 }

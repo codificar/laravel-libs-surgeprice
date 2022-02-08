@@ -145,25 +145,55 @@ class PredictData extends Command
                 fclose($open);
             }
 
+            $noSurge = false;
+            // Calculate means for region
+            if($region->total_areas)
+            {
+                $providers_avg = count($providers) / $region->total_areas;
+            }
+            // Not enough data in region to create surge areas, end surge for all areas if not finished.
+            else
+                $noSurge = true;
+            // Get average demand/supply for the entire region (including outliers).
+            if($providers_avg)
+                $supply_demand_avg = count($requests) / count($providers);
+            // No providers in region, end surge for all areas if not finished.
+            else
+                $noSurge = true;
+
             // Add surge multiplier historical data for each surge area in region
             foreach ($region->surgeAreas()->get() as $surgeArea)
             {
-                if(array_key_exists($surgeArea->index, $provider_request_map))
+                $surgeHistory = new SurgeHistory();
+                $surgeHistory->surgeArea()->associate($surgeArea);
+                // No surge, end surge for the area if not finished.
+                if($noSurge)
                 {
-                    $surgeHistory = new SurgeHistory();
-                    $surgeHistory->surgeArea()->associate($surgeArea);
+                    $surgeHistory->providers_count = 0;
+                    $surgeHistory->requests_count = 0;
+                    $this->endSurge($surgeHistory);
+                }
+                // Calculate new surge multiplier for the area.
+                else if(array_key_exists($surgeArea->index, $provider_request_map))
+                {
                     $surgeHistory->providers_count = $provider_request_map[$surgeArea->index][0];
                     $surgeHistory->requests_count = $provider_request_map[$surgeArea->index][1];
-                    $factor =  ($surgeHistory->providers_count)? // are there any providers in the surge area?
-                                $surgeHistory->requests_count /  $surgeHistory->providers_count: // supply/demand
-                                1.0;
+                    // area demand/supply
+                    $factor =  $surgeHistory->requests_count /
+                                // are there any providers in the surge area?
+                                (($surgeHistory->providers_count)? $surgeHistory->providers_count:
+                                // if not, use region average instead
+                                $providers_avg);
+                    
+                    // normalize factor by region average demand/supply
+                    $factor /= $supply_demand_avg;
 
-                    // Set multiplier delimiters
+                    // Supply attends demand? End surge for area if not finished.
                     if($factor < $settings->min_surge)
                     {
-                        // No surge multiplier, use default value
-                        $factor = 1.0;
+                        $this->endSurge($surgeHistory);
                     }
+                    // Set factor delimiters to create surge multiplier
                     else
                     {
                         // Set upper bound for multiplier given the delimiter method.
@@ -181,13 +211,26 @@ class PredictData extends Command
                             default:
                                 break;
                         }
+                        $surgeHistory->multiplier = $factor;
+                        // Save the current surge multiplier for the surge area.
+                        $surgeHistory->save();
                     }
-                    $surgeHistory->multiplier = $factor;
-                    
-                    // Save the current surge multiplier for the surge area.
-                    $surgeHistory->save();
                 }
             }
+        }
+    }
+
+    // End surge: save a 1.0x multiplier only if the last one is a larger value.
+    private function endSurge($newSurgeHistory)
+    {
+        $newSurgeHistory->multiplier = 1.0;
+        // Get last history for area.
+        $lastSurgeHistory = $newSurgeHistory->surgeArea->SurgeHistory()->orderBy('created_at', 'DESC')->first();
+        // Is the last history a surge for the area?
+        if(!$lastSurgeHistory || ($lastSurgeHistory && $lastSurgeHistory->multiplier > 1))
+        {
+            // Save end of surge.
+            $newSurgeHistory->save();
         }
     }
 }

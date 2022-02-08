@@ -90,7 +90,14 @@ class SurgePriceController extends Controller
                 $region->save();
                 break;
             case 'delete':
-                SurgeRegion::find($request->id)->delete();
+                $region = SurgeRegion::find($request->id);
+                foreach ($region->surgeAreas()->get() as $surgeArea)
+                {
+                    $surgeArea->surgeHistory()->delete();
+                }
+                $region->surgeAreas()->delete();
+                $region->cities()->delete();
+                $region->delete();
                 break;
             default:
                 # code...
