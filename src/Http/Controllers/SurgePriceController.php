@@ -30,6 +30,12 @@ class SurgePriceController extends Controller
             SurgeSettings::NONE => asset('vendor/codificar/surgeprice/NONE.png')
         ];
 
+        $sizes_figs = [
+            'S' => asset('vendor/codificar/surgeprice/S.jpg'),
+            'M' => asset('vendor/codificar/surgeprice/M.jpg'),
+            'L' => asset('vendor/codificar/surgeprice/L.jpg')
+        ];
+
         $response_message = "";
         switch ($response) {
             case SurgePriceController::SAVE_SETTINGS:
@@ -49,6 +55,7 @@ class SurgePriceController extends Controller
             'settings' => $settings, 
             'regions' => $regions,
             'area_sizes' => SurgeRegion::$area_sizes,
+            'sizes_figs' => $sizes_figs,
             'states' => SurgeRegion::$states,
             'delimiters' => $delimiters,
             'response_message' => $response_message

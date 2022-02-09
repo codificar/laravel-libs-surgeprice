@@ -42,7 +42,11 @@
         <hr>
         
         <h3>Regiões</h3>
-        
+        <div id="sizes-preview" style="display: none;" >
+            <img width="200px" src="{{$sizes_figs['L']}}">
+            <img width="200px" src="{{$sizes_figs['M']}}">
+            <img width="200px" src="{{$sizes_figs['S']}}">
+        </div>
         <p>
         @if(count($regions) > 0)
         @foreach($regions as $region)
@@ -69,6 +73,7 @@
             <option value="{{$size}}" @if ($size == $region->area_size) selected="selected" @endif >{{$size}}</option>
         @endforeach
         </select>
+        <button type="button" onclick="toggleSizeHint()">?</button>
         <span>  |  </span>
         <label>total atual: <b>{{$region->total_areas}}</b></label>
         <span>  |  </span>
@@ -107,7 +112,6 @@
         </p>
         <button id="createRegion">Adicionar</button>
 
-
         <script>
             @if($response_message)
             alert("{{$response_message}}");
@@ -128,30 +132,12 @@
                 {
                     all_cities = {};
                 }
-                // // TODO: ver chave para overwrite em vez de push
                 all_cities[city.id] = {'id': city.id, 'name': city.name, 'enabled': city.checked};
                 document.getElementById(regionId+'-cities').value = JSON.stringify(all_cities);
             }
 
-            function saveCities(regionId)
-            {
-                // var x = document.getElementById(regionId);
-                // all_cities = []
-                // for (index = 0; index < x.children[0].children.length; index++) {
-                //     input = x.children[0].children[index].children[0];
-                //     if(input)
-                //     {
-                //         // TODO: mudar para onCheck e chamar updateCity (vira overwrite)
-                //         all_cities.push({'id': input.id, 'name': input.name, 'enabled': input.checked});
-                //     }
-                // }
-                // document.getElementById(regionId+'-cities').value = JSON.stringify(all_cities);
-            }
-
             function toggleCities(regionId, bt)
             {
-                // saveCities(regionId)
-                // console.log(document.getElementById('cities').value);
                 var x = document.getElementById(regionId);
                 if (x.style.display === "none")
                 {
@@ -169,11 +155,20 @@
             {
                 switch (p) {
                     @foreach($delimiters as $delimiter => $val)case "{{$delimiter}}":
-                        document.getElementById('preview').src = "{{$val}}";
+                        document.getElementById("preview").src = "{{$val}}";
                         break;
                     @endforeach default:
                         break;
                 }
+            }
+
+            function toggleSizeHint()
+            {
+                var x = document.getElementById("sizes-preview");
+                x.style.display = (x.style.display == "none")? 
+                    x.style.display = "block": 
+                    x.style.display = "none";
+
             }
         </script>
         </body>
