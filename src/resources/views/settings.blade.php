@@ -62,7 +62,7 @@
         @endforeach
         </select><br/>
         <img id="preview" height="200px" src="{{ $delimiters[$settings->delimiter] }}">
-
+        </br>
         <h3>Configurações avançadas (Machine Learning)</h3>
         <details>
         <summary><i>Local Outlier Factor</i></summary>
@@ -73,8 +73,7 @@
         <input type="text" style="text-align:center;" maxlength="4" size="4" name="lof_contamination"  value="{{$settings->lof_contamination}}"></br>
         </details>
         <br/>
-        <details>
-        <summary><i>Heatmap</i></summary>
+        <h3>Heatmap</h3>
         <p/>
         <label>Fator de expansão dos pontos: </label>
         <input type="text" style="text-align:center;" maxlength="4" size="4" name="heatmap_expand_factor"  value="{{$settings->heatmap_expand_factor}}">
@@ -88,8 +87,6 @@
         @foreach($settings->heatmap_colors_pos as $i => $pos)
         <input type="text" style="text-align:center;" maxlength="4" size="4" name="heatmap_colors_pos[{{$i}}]"  value="{{$pos}}">
         @endforeach
-        </br>
-        </details>
         <h3>
         <button>Salvar</button>
         </h3>

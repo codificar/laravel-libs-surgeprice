@@ -49,13 +49,13 @@ class SurgePriceController extends Controller
         $response_message = "";
         switch ($response->status) {
             case SurgePriceController::SAVE_SETTINGS:
-                $response_message = "Configurações salvas!\\r\\rExecute o comando ml:train_models";
+                $response_message = "Configurações salvas!\\r\\rAtualize os modelos de Machine Learning";
                 break;
             case SurgePriceController::CREATE_REGION:
                 $regions []= new SurgeRegion();
                 break;
             case SurgePriceController::MANAGE_REGION:
-                $response_message = "Regiões atualizadas!\\r\\rExecute o comando ml:train_models";
+                $response_message = "Regiões atualizadas!\\r\\rAtualize os modelos de Machine Learning";
                 break;
             default:
                 break;
@@ -152,12 +152,6 @@ class SurgePriceController extends Controller
         }
     
         return rmdir($dir);
-    }
-
-    // TODO: test API, remove it.
-    public function getSurge(Request $sessionRequest)
-    {
-        return $this->getSurgeMultiplier($sessionRequest->lat, $sessionRequest->lng);
     }
     
     // Get the surge multiplier given a geolocation.
