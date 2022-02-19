@@ -92,7 +92,7 @@ php artisan ml:train_models
 ```
 > **Note**: This command will exclude all existing surge areas and their respective surge history. 
 > 
-> It is recommended to run it periodically (between 1x a month to 1x year) on new regions, to detect possible new surge areas.
+> It is recommended to run it periodically (between 1x a month to 1x year) on all regions, to detect possible new surge areas.
 
 
 Schedule the following command to update the surge fare for each surge area defined by the ML models:
