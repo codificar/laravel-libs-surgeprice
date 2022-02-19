@@ -13,8 +13,9 @@ use Illuminate\Http\Request;
 |
 */
 
-// Route::group(
-//     array('namespace' => 'Codificar\SurgePrice\Http\Controllers', 'prefix' => '/surgeprice',
-//     function () {
-//         Route::get('/inference', 'SurgePriceTestController@exampleApi');
-//     }));
+Route::group(
+    array('namespace' => 'Codificar\SurgePrice\Http\Controllers', 'prefix' => '/surgeprice'),
+    function () {
+        Route::get('/heatmap', 'SurgePriceController@heatMap');
+        Route::get('/getsurge', 'SurgePriceController@getSurge'); // TODO: remove.
+    });

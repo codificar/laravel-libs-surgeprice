@@ -42,7 +42,7 @@ def main(argv):
     dataset = pd.read_csv(path+'/'+predictionfile, names=['lat', 'lng', 'id'] , header=None)
 
     # go to state path to retrieve models and save output
-    path += '/' + state;
+    path += '/' + state
 
     # Load Local Outlier Factor model for novelty/anomally detection (region boundaries)
     X = dataset[["lat", "lng"]].values

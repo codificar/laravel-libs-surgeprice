@@ -71,7 +71,7 @@ class PredictData extends Command
         }
         $request_prediction_file = 'request-predict.csv';
         $inference = implode(PHP_EOL,$request_prediction);
-        file_put_contents($settings->model_files_path.'/'.$request_prediction_file, $inference);
+        file_put_contents($settings->model_files_path.DIRECTORY_SEPARATOR.$request_prediction_file, $inference);
 
         // Iterate over active providers in the time period.
         $provider_prediction = [];
@@ -88,14 +88,14 @@ class PredictData extends Command
         }
         $provider_prediction_file = 'provider-predict.csv';
         $inference = implode(PHP_EOL,$provider_prediction);
-        file_put_contents($settings->model_files_path.'/'.$provider_prediction_file, $inference);
+        file_put_contents($settings->model_files_path.DIRECTORY_SEPARATOR.$provider_prediction_file, $inference);
         
         // Iterate over existing regions to predict the data.
         $regions = SurgeRegion::all();
         foreach ($regions as $region)
         {
             $provider_request_map = []; // supply and demand count
-            $ml_path = $settings->model_files_path.'/';
+            $ml_path = $settings->model_files_path.DIRECTORY_SEPARATOR;
             // Run the model prediction(inference) using python ML with the request data.
             $process = new Process(['python3', __DIR__.'/../../resources/scripts/predict-data.py',
                                     '-i',$request_prediction_file,
@@ -104,9 +104,9 @@ class PredictData extends Command
                                     '-p' ,$ml_path]);
             $process->run();
             // Set the requests count in time period for each surge area in region.
-            if (file_exists($ml_path.'/'.$region->state.'/request-output.csv'))
+            if (file_exists($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv'))
             {
-                $open = fopen($ml_path.'/'.$region->state.'/request-output.csv', "r");
+                $open = fopen($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv', "r");
                 while (($line = fgets($open)) !== false) {
                     $area = array_map('intval', explode(",",$line))[0];
                     if(!array_key_exists($area, $provider_request_map))
@@ -128,9 +128,9 @@ class PredictData extends Command
                                     '-p' ,$ml_path]);
             $process->run();
             // Set the active providers count in time period for each surge area in region.
-            if (file_exists($ml_path.'/'.$region->state.'/provider-output.csv')) 
+            if (file_exists($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv')) 
             {
-                $open = fopen($ml_path.'/'.$region->state.'/provider-output.csv', "r");
+                $open = fopen($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv', "r");
                 while (($line = fgets($open)) !== false) {
                     $area = array_map('intval', explode(",",$line))[0];
                     if(!array_key_exists($area, $provider_request_map))
@@ -225,7 +225,7 @@ class PredictData extends Command
     {
         $newSurgeHistory->multiplier = 1.0;
         // Get last history for area.
-        $lastSurgeHistory = $newSurgeHistory->surgeArea->SurgeHistory()->orderBy('created_at', 'DESC')->first();
+        $lastSurgeHistory = $newSurgeHistory->surgeArea->surgeHistory()->orderBy('created_at', 'DESC')->first();
         // Is the last history a surge for the area?
         if(!$lastSurgeHistory || ($lastSurgeHistory && $lastSurgeHistory->multiplier > 1))
         {
