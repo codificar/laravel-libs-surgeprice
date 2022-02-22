@@ -235,7 +235,7 @@ class SurgePriceController extends Controller
             $process = new Process(['python3', __DIR__.'/../../resources/scripts/heatmap.py',
             '-s', $region->state,
             '-e', $settings->heatmap_expand_factor,
-            '-m', implode(",", $area_multiplier),
+            '-m', implode(",", $area_multiplier).',',
             '-p', $settings->model_files_path]);
             $process->run();
 
