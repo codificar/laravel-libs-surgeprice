@@ -186,7 +186,8 @@ class PredictData extends Command
                                 $providers_avg);
                     
                     // normalize factor by region average demand/supply
-                    $factor /= $supply_demand_avg;
+                    if ($supply_demand_avg > 0)
+                        $factor /= $supply_demand_avg;
 
                     // Supply attends demand? End surge for area if not finished.
                     if($factor < $settings->min_surge)
