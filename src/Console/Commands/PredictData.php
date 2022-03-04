@@ -90,76 +90,89 @@ class PredictData extends Command
         $inference = implode(PHP_EOL,$provider_prediction);
         file_put_contents($settings->model_files_path.DIRECTORY_SEPARATOR.$provider_prediction_file, $inference);
         
+        $noSurge = false;
+        // No requests or providers in window, no surge to generate.
+        if(count($requests) == 0 || count($providers) == 0)
+            $noSurge = true;
+
         // Iterate over existing regions to predict the data.
         $regions = SurgeRegion::all();
         foreach ($regions as $region)
         {
-            $provider_request_map = []; // supply and demand count
-            $ml_path = $settings->model_files_path.DIRECTORY_SEPARATOR;
-            // Run the model prediction(inference) using python ML with the request data.
-            $process = new Process(['python3', __DIR__.'/../../resources/scripts/predict-data.py',
-                                    '-i',$request_prediction_file,
-                                    '-d', 'request',
-                                    '-s', $region->state,
-                                    '-p' ,$ml_path]);
-            $process->run();
-            // Set the requests count in time period for each surge area in region.
-            if (file_exists($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv'))
+            // There are providers and requests in window, predict data.
+            if($noSurge == false)
             {
-                $open = fopen($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv', "r");
-                while (($line = fgets($open)) !== false) {
-                    $area = array_map('intval', explode(",",$line))[0];
-                    if(!array_key_exists($area, $provider_request_map))
-                    {
-                        $provider_request_map[$area] = [0,1];
-                    }
-                    else
-                    {
-                        $provider_request_map[$area][1] += 1;
-                    }
-                }            
-                fclose($open);
-            }
-            // Run the model prediction(inference) using python ML with the provider data.
-            $process = new Process(['python3', __DIR__.'/../../resources/scripts/predict-data.py',
-                                    '-i',$provider_prediction_file,
-                                    '-d', 'provider',
-                                    '-s', $region->state,
-                                    '-p' ,$ml_path]);
-            $process->run();
-            // Set the active providers count in time period for each surge area in region.
-            if (file_exists($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv')) 
-            {
-                $open = fopen($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv', "r");
-                while (($line = fgets($open)) !== false) {
-                    $area = array_map('intval', explode(",",$line))[0];
-                    if(!array_key_exists($area, $provider_request_map))
-                    {
-                        $provider_request_map[$area] = [1,0];
-                    }
-                    else
-                    {
-                        $provider_request_map[$area][0] += 1;
-                    }
+                $provider_request_map = []; // supply and demand count
+                $ml_path = $settings->model_files_path.DIRECTORY_SEPARATOR;
+                // Empty request-output file.
+                file_put_contents($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv', "");
+                // Run the model prediction(inference) using python ML with the request data.
+                $process = new Process(['python3', __DIR__.'/../../resources/scripts/predict-data.py',
+                                        '-i',$request_prediction_file,
+                                        '-d', 'request',
+                                        '-s', $region->state,
+                                        '-p' ,$ml_path]);
+                $process->run();
+                // Set the requests count in time period for each surge area in region.
+                if (file_exists($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv'))
+                {
+                    $open = fopen($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv', "r");
+                    while (($line = fgets($open)) !== false) {
+                        $area = array_map('intval', explode(",",$line))[0];
+                        if(!array_key_exists($area, $provider_request_map))
+                        {
+                            $provider_request_map[$area] = [0,1];
+                        }
+                        else
+                        {
+                            $provider_request_map[$area][1] += 1;
+                        }
+                    }            
+                    fclose($open);
                 }
-                fclose($open);
-            }
+                // Empty provider-output file.
+                file_put_contents($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv', "");
+                // Run the model prediction(inference) using python ML with the provider data.
+                $process = new Process(['python3', __DIR__.'/../../resources/scripts/predict-data.py',
+                                        '-i',$provider_prediction_file,
+                                        '-d', 'provider',
+                                        '-s', $region->state,
+                                        '-p' ,$ml_path]);
+                $process->run();
+                // Set the active providers count in time period for each surge area in region.
+                if (file_exists($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv')) 
+                {
+                    $open = fopen($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv', "r");
+                    while (($line = fgets($open)) !== false) {
+                        $area = array_map('intval', explode(",",$line))[0];
+                        if(!array_key_exists($area, $provider_request_map))
+                        {
+                            $provider_request_map[$area] = [1,0];
+                        }
+                        else
+                        {
+                            $provider_request_map[$area][0] += 1;
+                        }
+                    }
+                    fclose($open);
+                }
 
-            $noSurge = false;
-            // Calculate means for region
-            if($region->total_areas)
-            {
-                $providers_avg = count($providers) / $region->total_areas;
+                // Check if active providers are at least one per area.
+                if($region->total_areas && count($providers) >= $region->total_areas)
+                {
+                    // Calculate means for region
+                    $providers_avg = count($providers) / $region->total_areas;
+                }
+                // Not enough data in region to create surge areas, end surge for all areas if not finished.
+                else
+                    $noSurge = true;
+                // Get average demand/supply for the entire region (including outliers).
+                if($providers_avg)
+                    $supply_demand_avg = count($requests) / count($providers);
+                // Not enough providers in region, end surge for all areas if not finished.
+                else
+                    $noSurge = true;
             }
-            // Not enough data in region to create surge areas, end surge for all areas if not finished.
-            else
-                $noSurge = true;
-            // Get average demand/supply for the entire region (including outliers).
-            if($providers_avg)
-                $supply_demand_avg = count($requests) / count($providers);
-            // No providers in region, end surge for all areas if not finished.
-            else
-                $noSurge = true;
 
             // Add surge multiplier historical data for each surge area in region
             foreach ($region->surgeAreas()->get() as $surgeArea)
@@ -185,9 +198,16 @@ class PredictData extends Command
                                 // if not, use region average instead
                                 $providers_avg);
                     
-                    // normalize factor by region average demand/supply
-                    if ($supply_demand_avg > 0)
+                    // Normalize factor by region average demand/supply.
+                    if ($supply_demand_avg && $supply_demand_avg > 0)
+                    {
                         $factor /= $supply_demand_avg;
+                    }
+                    // No average demand/supply = no data, no surge for area.
+                    else
+                    {
+                        $factor = 1;
+                    }
 
                     // Supply attends demand? End surge for area if not finished.
                     if($factor < $settings->min_surge)
