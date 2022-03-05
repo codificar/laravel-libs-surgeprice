@@ -71,6 +71,9 @@ class PredictData extends Command
         }
         $request_prediction_file = 'request-predict.csv';
         $inference = implode(PHP_EOL,$request_prediction);
+        // Break last line for file, if data is not empty.
+        if($inference)
+            $inference .= PHP_EOL;
         file_put_contents($settings->model_files_path.DIRECTORY_SEPARATOR.$request_prediction_file, $inference);
 
         // Iterate over active providers in the time period.
@@ -88,6 +91,9 @@ class PredictData extends Command
         }
         $provider_prediction_file = 'provider-predict.csv';
         $inference = implode(PHP_EOL,$provider_prediction);
+        // Break last line for file, if data is not empty.
+        if($inference)
+            $inference .= PHP_EOL;
         file_put_contents($settings->model_files_path.DIRECTORY_SEPARATOR.$provider_prediction_file, $inference);
         
         $noSurge = false;
@@ -114,6 +120,7 @@ class PredictData extends Command
                                         '-p' ,$ml_path]);
                 $process->run();
                 // Set the requests count in time period for each surge area in region.
+                $regionTotalRequests = 0;
                 if (file_exists($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv'))
                 {
                     $open = fopen($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv', "r");
@@ -127,6 +134,7 @@ class PredictData extends Command
                         {
                             $provider_request_map[$area][1] += 1;
                         }
+                        $regionTotalRequests += 1;
                     }            
                     fclose($open);
                 }
@@ -140,6 +148,7 @@ class PredictData extends Command
                                         '-p' ,$ml_path]);
                 $process->run();
                 // Set the active providers count in time period for each surge area in region.
+                $regionTotalProviders = 0;
                 if (file_exists($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv')) 
                 {
                     $open = fopen($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv', "r");
@@ -153,25 +162,24 @@ class PredictData extends Command
                         {
                             $provider_request_map[$area][0] += 1;
                         }
+                        $regionTotalProviders += 1;
                     }
                     fclose($open);
                 }
 
                 // Check if active providers are at least one per area.
-                if($region->total_areas && count($providers) >= $region->total_areas)
+                if($region->total_areas && $regionTotalProviders >= $region->total_areas)
                 {
-                    // Calculate means for region
-                    $providers_avg = count($providers) / $region->total_areas;
+                    // Calculate averarge providers for an area in region
+                    $providers_avg = $regionTotalProviders / $region->total_areas;
+                    // Get average demand/supply for the entire region (just inliers).
+                    $supply_demand_avg = $regionTotalRequests / $regionTotalProviders;
                 }
                 // Not enough data in region to create surge areas, end surge for all areas if not finished.
                 else
+                {
                     $noSurge = true;
-                // Get average demand/supply for the entire region (including outliers).
-                if($providers_avg)
-                    $supply_demand_avg = count($requests) / count($providers);
-                // Not enough providers in region, end surge for all areas if not finished.
-                else
-                    $noSurge = true;
+                }
             }
 
             // Add surge multiplier historical data for each surge area in region

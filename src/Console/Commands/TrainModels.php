@@ -148,6 +148,9 @@ class TrainModels extends Command
             }
             //  Save the train file, using path provided in settings.
             $train = implode(PHP_EOL,$regionTrainedData);
+            // Break last line for file, if data is not empty.
+            if($train)
+                $train .= PHP_EOL;
             file_put_contents($ml_path.$train_file, $train);
             //  Run the model train using Python ML to obtain TOTAL AREAS, CENTROIDS and INDEXES.
             $process = new Process(['python3', __DIR__.'/../../resources/scripts/train-models.py',
