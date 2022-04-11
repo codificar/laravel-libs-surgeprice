@@ -10,17 +10,19 @@ from sklearn import cluster
 def main(argv):
     # Validate input arguments
     try:
-        opts, args = getopt.getopt(argv,"ht:m:n:c:p:")
+        opts, args = getopt.getopt(argv,"ht:s:m:n:c:p:")
     except:
         print('Usage:')
-        print('train-models.py -t <train file> -m <min area requests> -n <lof neighbors> -c <lof contamination> -p <model files path>')
+        print('train-models.py -t <train file> -s <area size> -m <min area requests> -n <lof neighbors> -c <lof contamination> -p <model files path>')
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print('train-models.py -t <train file> -m <min area requests> -n <lof neighbors> -c <lof contamination> -p <model files path>')
+            print('train-models.py -t <train file> -s <area size> -m <min area requests> -n <lof neighbors> -c <lof contamination> -p <model files path>')
             sys.exit()
         elif opt in ["-t"]:
             trainfile = arg
+        elif opt in ["-s"]:
+            size = arg
         elif opt in ["-m"]:
             minreqs = int(arg)
         elif opt in ["-n"]:
@@ -32,13 +34,14 @@ def main(argv):
 
     try:
         trainfile
+        size
         minreqs
         n
         c
         path
     except:
         print('Usage:')
-        print('train-models.py -t <trainfile> -m <min area requests> -n <lof neighbors> -c <lof contamination> -p <model files path>')        
+        print('train-models.py -t <trainfile> -s <area size> -m <min area requests> -n <lof neighbors> -c <lof contamination> -p <model files path>')        
         sys.exit(2)
 
     # Read train data
@@ -59,6 +62,13 @@ def main(argv):
         top.append(item[0])
 
     ds = dataset[dataset.prefix.isin(top)]
+    # Prune prefix based on area size
+    # Disable chained assignment (false positive) warning
+    pd.options.mode.chained_assignment = None
+    if size == 'M':
+        ds.prefix = ds.prefix.div(10).astype(int)
+    elif size == 'L':
+        ds.prefix = ds.prefix.div(100).astype(int)
     # Total surge areas
     total_areas = len(ds.prefix.unique())
 

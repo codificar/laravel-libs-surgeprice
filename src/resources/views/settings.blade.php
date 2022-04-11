@@ -4,6 +4,44 @@
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
         <meta charset="utf-8">
         <title>Surge Fare Setup</title>
+        <style>
+            .modal {
+                display: none; /* Hidden by default */
+                position: fixed; /* Stay in place */
+                z-index: 1; /* Sit on top */
+                padding-top: 100px; /* Location of the box */
+                left: 0;
+                top: 0;
+                width: 100%; /* Full width */
+                height: 100%; /* Full height */
+                overflow: auto; /* Enable scroll if needed */
+                background-color: rgb(0,0,0); /* Fallback color */
+                background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            }
+
+            /* Modal Content */
+            .modal-content {
+                background-color: #fefefe;
+                margin: auto;
+                padding: 10px;
+                width: 55%;
+                min-width: 300px;
+            }
+            /* The Close Button */
+            .close {
+                color: #aaaaaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+            }
+
+            .close:hover,
+            .close:focus {
+                color: #000;
+                text-decoration: none;
+                cursor: pointer;
+            }
+        </style>
     </head>
     <body>
         <h3>Configurações gerais</h3>
@@ -24,17 +62,31 @@
         @endforeach
         </select><br/>
         <img id="preview" height="200px" src="{{ $delimiters[$settings->delimiter] }}">
-
+        </br>
         <h3>Configurações avançadas (Machine Learning)</h3>
         <details>
         <summary><i>Local Outlier Factor</i></summary>
         <p/>
         <label>N.º neighbors: </label>
-        <input type="text" style="text-align:center;" maxlength="2" size="2" name="lof_neighbors"  value="{{$settings->lof_neighbors}}"></br>
+        <input type="text" style="text-align:center;" maxlength="2" size="2" name="lof_neighbors"  value="{{$settings->lof_neighbors}}"></br></br>
         <label>Fator de contaminação: </label>
         <input type="text" style="text-align:center;" maxlength="4" size="4" name="lof_contamination"  value="{{$settings->lof_contamination}}"></br>
         </details>
-
+        <br/>
+        <h3>Heatmap</h3>
+        <p/>
+        <label>Fator de expansão dos pontos: </label>
+        <input type="text" style="text-align:center;" maxlength="4" size="4" name="heatmap_expand_factor"  value="{{$settings->heatmap_expand_factor}}">
+        </br></br>
+        <label>Gradiente de cores: </label>
+        @foreach($settings->heatmap_colors as $i => $color)
+        <input type="text" style="text-align:center;color:{{$color}}" maxlength="7" size="7" name="heatmap_colors[{{$i}}]"  value="{{$color}}">
+        @endforeach
+        </br></br>
+        <label>Posição das cores (0.0 - 1.0): </label>
+        @foreach($settings->heatmap_colors_pos as $i => $pos)
+        <input type="text" style="text-align:center;" maxlength="4" size="4" name="heatmap_colors_pos[{{$i}}]"  value="{{$pos}}">
+        @endforeach
         <h3>
         <button>Salvar</button>
         </h3>
@@ -42,10 +94,15 @@
         <hr>
         
         <h3>Regiões</h3>
-        <div id="sizes-preview" style="display: none;" >
-            <img width="200px" src="{{$sizes_figs['L']}}">
-            <img width="200px" src="{{$sizes_figs['M']}}">
-            <img width="200px" src="{{$sizes_figs['S']}}">
+        <div id="modal" class="modal" >
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <p style="text-align:center;padding:10px">
+                    <img width="300px" src="{{$sizes_figs['L']}}">
+                    <img width="300px" src="{{$sizes_figs['M']}}">
+                    <img width="300px" src="{{$sizes_figs['S']}}">
+                </p>
+            </div>
         </div>
         <p>
         @if(count($regions) > 0)
@@ -164,11 +221,11 @@
 
             function toggleSizeHint()
             {
-                var x = document.getElementById("sizes-preview");
-                x.style.display = (x.style.display == "none")? 
-                    x.style.display = "block": 
-                    x.style.display = "none";
+                document.getElementById("modal").style.display = "block";
+            }
 
+            document.getElementsByClassName("close")[0].onclick = function () {
+                document.getElementById("modal").style.display = "none";
             }
         </script>
         </body>
