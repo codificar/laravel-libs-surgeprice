@@ -17,7 +17,7 @@ Add in composer.json:
 
 ```php
 require:{
-        "codificar/surgeprice": "master@dev",
+        "codificar/surgeprice": "1.0.*",//"master@dev",
 }
 ```
 
@@ -92,9 +92,7 @@ php artisan ml:train_models
 ```
 > **Note**: This command will exclude all existing surge areas and their respective surge history. 
 > 
-> It is only recommended to run it periodically on new regions, to detect possible new surge areas.
-> 
-> Avoid running it in stabilized regions, where all surge areas were already detected. 
+> It is recommended to run it periodically (**between 1x a month to 1x year**) on **all regions**, to detect possible new surge areas.
 
 
 Schedule the following command to update the surge fare for each surge area defined by the ML models:
@@ -102,4 +100,4 @@ Schedule the following command to update the surge fare for each surge area defi
 ```shell
 php artisan ml:predict_data
 ```
-> **Note**: It is recommended to schedule this command with the same periodicity set in the **Configuration** step (update_surge_window).
+> **Note**: It is recommended to schedule this command with the **same periodicity** set in the **Configuration** step (update_surge_window).
