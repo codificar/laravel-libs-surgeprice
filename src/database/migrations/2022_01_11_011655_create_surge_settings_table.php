@@ -33,7 +33,7 @@ class CreateSurgeSettingsTable extends Migration
             'min_surge' => 1.5,
             'max_surge' => 5,
             'delimiter' => SurgeSettings::DAMPING,
-            'lof_neighbors' => 15,
+            'lof_neighbors' => 50,
             'lof_contamination' => 0.05,
             'model_files_path' => '/var/tmp/surgeprice/',
             'created_at' => Carbon::now(),

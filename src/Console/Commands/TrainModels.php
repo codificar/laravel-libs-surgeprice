@@ -69,21 +69,7 @@ class TrainModels extends Command
         {
             $currentRegions[$region->state] = $region;
             $trainedData[$region->state] = [];
-            // Set prefix length to calculate total cluster areas.
-            switch ($region->area_size) {
-                case 'L':
-                    # Large: 3 digits prefix.
-                    $prefixesLentgh[$region->state] = 3;
-                    break;
-                case 'M':
-                    # Medium: 4 digits prefix.
-                    $prefixesLentgh[$region->state] = 4;
-                    break;
-                default:
-                    # Small: 5 digits prefix.
-                    $prefixesLentgh[$region->state] = 5;
-                    break;
-            }
+
             // Get region cities into set.
             $regionCities[$region->state] = $region->cities()->pluck('enabled','name')->toArray();
         }
@@ -115,7 +101,7 @@ class TrainModels extends Command
                 if(array_key_exists($state, $currentRegions))
                 {
                     // Get postal code prefix for request.
-                    $prefix = substr($postal_code, 0, $prefixesLentgh[$state]);
+                    $prefix = substr($postal_code, 0, 5);
                     // Get request city.
                     if(count($cityState) > 0)
                         $city = trim(array_pop($cityState));
@@ -155,17 +141,21 @@ class TrainModels extends Command
         foreach ($trainedData as $state => $regionTrainedData)
         {
             // Create model files directory.
-            $ml_path = $settings->model_files_path.'/'.$state.'/';
+            $ml_path = $settings->model_files_path.DIRECTORY_SEPARATOR.$state.DIRECTORY_SEPARATOR;
             if (!file_exists($ml_path))
             {
                 mkdir($ml_path, 0777, true);
             }
             //  Save the train file, using path provided in settings.
             $train = implode(PHP_EOL,$regionTrainedData);
+            // Break last line for file, if data is not empty.
+            if($train)
+                $train .= PHP_EOL;
             file_put_contents($ml_path.$train_file, $train);
             //  Run the model train using Python ML to obtain TOTAL AREAS, CENTROIDS and INDEXES.
             $process = new Process(['python3', __DIR__.'/../../resources/scripts/train-models.py',
-                                    '-t',$train_file,
+                                    '-t', $train_file,
+                                    '-s', $currentRegions[$state]->area_size,
                                     '-m', $currentRegions[$state]->min_area_requests, 
                                     '-n', $settings->lof_neighbors, 
                                     '-c', $settings->lof_contamination,
@@ -174,6 +164,7 @@ class TrainModels extends Command
             // New model generated.
             if (file_exists($ml_path.'/centroids.csv'))
             {
+                $centroids = [];
                 $open = fopen($ml_path.'/centroids.csv', "r");
                 while (($data = fgetcsv($open, 1000, ",")) !== FALSE) 
                 {        
