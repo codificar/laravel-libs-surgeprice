@@ -15,7 +15,7 @@ class UpdateSurgeSettingsTable extends Migration
     {
         $surgeSettings = SurgeSettings::first();
 
-        $surgeSettings->model_files_path = 'storage/surgeprice/';
+        $surgeSettings->model_files_path = 'surgeprice';
         $surgeSettings->save();
     }
 

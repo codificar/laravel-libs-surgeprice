@@ -14,6 +14,7 @@ use Codificar\SurgePrice\Models\SurgeHistory;
 use DB;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 /**
  * Generate the Machine Learning Models (LOF & K-means) for surge area prediction.
@@ -78,7 +79,7 @@ class TrainModels extends Command
         // Create the training lists (one per region).
         // Add new cities to existing regions.
         $end = Carbon::now()->subDays(1);
-        $begin = Carbon::now()->subYears(1);
+        $begin = Carbon::now()->subMonths(1);
         $requests = Requests::where('created_at', '>=', $begin)
         ->where('created_at', '<=', $end)
         ->orderBy('created_at')
@@ -141,7 +142,7 @@ class TrainModels extends Command
         foreach ($trainedData as $state => $regionTrainedData)
         {
             // Create model files directory.
-            $ml_path = $settings->model_files_path.DIRECTORY_SEPARATOR.$state.DIRECTORY_SEPARATOR;
+            $ml_path = storage_path().DIRECTORY_SEPARATOR.$settings->model_files_path.DIRECTORY_SEPARATOR.$state.DIRECTORY_SEPARATOR;
             if (!file_exists($ml_path))
             {
                 mkdir($ml_path, 0777, true);
@@ -152,6 +153,7 @@ class TrainModels extends Command
             if($train)
                 $train .= PHP_EOL;
             file_put_contents($ml_path.$train_file, $train);
+
             //  Run the model train using Python ML to obtain TOTAL AREAS, CENTROIDS and INDEXES.
             $process = new Process(['python3', __DIR__.'/../../resources/scripts/train-models.py',
                                     '-t', $train_file,
@@ -159,8 +161,14 @@ class TrainModels extends Command
                                     '-m', $currentRegions[$state]->min_area_requests, 
                                     '-n', $settings->lof_neighbors, 
                                     '-c', $settings->lof_contamination,
-                                    '-p' ,$ml_path]);
+                                    '-p', $ml_path]);
             $process->run();
+
+			if (!$process->isSuccessful()) {
+				throw new ProcessFailedException($process);
+			}
+			
+			echo $process->getOutput();
             // New model generated.
             if (file_exists($ml_path.'/centroids.csv'))
             {

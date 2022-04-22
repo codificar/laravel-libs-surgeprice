@@ -64,6 +64,14 @@ class PredictData extends Command
         ->where('created_at', '<=', $end)
         ->orderBy('created_at')
         ->get();
+
+		$basePath = storage_path().DIRECTORY_SEPARATOR.$settings->model_files_path.DIRECTORY_SEPARATOR;
+
+		if (!file_exists($basePath))
+		{
+			mkdir($basePath, 0777, true);
+		}
+
         foreach($requests as $i => $request)
         {
             // Add the request data to the prediction list.
@@ -74,7 +82,7 @@ class PredictData extends Command
         // Break last line for file, if data is not empty.
         if($inference)
             $inference .= PHP_EOL;
-        file_put_contents($settings->model_files_path.DIRECTORY_SEPARATOR.$request_prediction_file, $inference);
+        file_put_contents($basePath.$request_prediction_file, $inference);
 
         // Iterate over active providers in the time period.
         $provider_prediction = [];
@@ -94,7 +102,7 @@ class PredictData extends Command
         // Break last line for file, if data is not empty.
         if($inference)
             $inference .= PHP_EOL;
-        file_put_contents($settings->model_files_path.DIRECTORY_SEPARATOR.$provider_prediction_file, $inference);
+        file_put_contents($basePath.$provider_prediction_file, $inference);
         
         $noSurge = false;
         // No requests or providers in window, no surge to generate.
@@ -109,9 +117,9 @@ class PredictData extends Command
             if($noSurge == false)
             {
                 $provider_request_map = []; // supply and demand count
-                $ml_path = $settings->model_files_path.DIRECTORY_SEPARATOR;
+                $ml_path = $basePath;
                 // Empty request-output file.
-                file_put_contents($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv', "");
+                file_put_contents($ml_path.$region->state.'/request-output.csv', "");
                 // Run the model prediction(inference) using python ML with the request data.
                 $process = new Process(['python3', __DIR__.'/../../resources/scripts/predict-data.py',
                                         '-i',$request_prediction_file,
@@ -121,9 +129,9 @@ class PredictData extends Command
                 $process->run();
                 // Set the requests count in time period for each surge area in region.
                 $regionTotalRequests = 0;
-                if (file_exists($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv'))
+                if (file_exists($ml_path.$region->state.'/request-output.csv'))
                 {
-                    $open = fopen($ml_path.DIRECTORY_SEPARATOR.$region->state.'/request-output.csv', "r");
+                    $open = fopen($ml_path.$region->state.'/request-output.csv', "r");
                     while (($line = fgets($open)) !== false) {
                         $area = array_map('intval', explode(",",$line))[0];
                         if(!array_key_exists($area, $provider_request_map))
@@ -139,7 +147,7 @@ class PredictData extends Command
                     fclose($open);
                 }
                 // Empty provider-output file.
-                file_put_contents($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv', "");
+                file_put_contents($ml_path.$region->state.'/provider-output.csv', "");
                 // Run the model prediction(inference) using python ML with the provider data.
                 $process = new Process(['python3', __DIR__.'/../../resources/scripts/predict-data.py',
                                         '-i',$provider_prediction_file,
@@ -149,9 +157,9 @@ class PredictData extends Command
                 $process->run();
                 // Set the active providers count in time period for each surge area in region.
                 $regionTotalProviders = 0;
-                if (file_exists($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv')) 
+                if (file_exists($ml_path.$region->state.'/provider-output.csv')) 
                 {
-                    $open = fopen($ml_path.DIRECTORY_SEPARATOR.$region->state.'/provider-output.csv', "r");
+                    $open = fopen($ml_path.$region->state.'/provider-output.csv', "r");
                     while (($line = fgets($open)) !== false) {
                         $area = array_map('intval', explode(",",$line))[0];
                         if(!array_key_exists($area, $provider_request_map))
