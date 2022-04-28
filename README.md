@@ -60,7 +60,7 @@ Run the migrations:
 $ php artisan migrate
 ```
 
-Install python 3 required libs:
+Install **python 3** required libs:
 ```
 sudo apt install python3-pip
 
@@ -68,6 +68,7 @@ pip3 install -U pandas
 
 pip3 install -U scikit-learn
 ```
+> **Note**: Depending on how the laravel commands will be executed, you may have to install the libs as root/superuser. 
 
 ## Configuration
 
