@@ -174,7 +174,7 @@ class TrainModels extends Command
             {
                 $centroids = [];
                 $open = fopen($ml_path.'/centroids.csv', "r");
-                while (($data = fgetcsv($open, 1000, ",")) !== FALSE) 
+                while (($data = fgetcsv($open, 1000, ",", '"', "\\")) !== FALSE) 
                 {        
                     $centroids[] = array_map('floatval', $data); 
                 }
